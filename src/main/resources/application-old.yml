@@ -1,0 +1,75 @@
+micronaut:
+  application:
+    name: abi_accounts
+  security:
+    authentication: bearer
+    oauth2:
+      enabled: true
+      clients:
+        xero:
+          client-id: 54BC4F17DEBF4762A5EB7AC764316652
+          client-secret: pqHPB70BXxCuGaMMnqvjztBFntopwb5si5w3PkAnVgmH9ZYm
+          scopes:
+            - openid
+            - email
+            - profile
+            - offline_access
+            - accounting.transactions
+            - accounting.journals.read
+          authorization:
+            url: https://login.xero.com/identity/connect/authorize
+          token:
+            url: https://identity.xero.com/connect/token
+            auth-method: client-secret-post
+    endpoints:
+      logout:
+        get-allowed: true
+      reject-not-found: false
+    token:
+      jwt:
+        signatures:
+          secret:
+            generator:
+              secret: ${JWT_GENERATOR_SIGNATURE_SECRET:pleaseChangeThisSecretForANewOne}
+              jws-algorithm: HS256
+        generator:
+          access-token:
+            expiration: 43200
+  ssl:
+    enabled: false
+    build-self-signed: true
+    port: 443
+  router:
+    static-resources:
+      swagger:
+        paths: classpath:META-INF/swagger
+        mapping: /swagger/**
+      swagger-ui:
+        paths: classpath:META-INF/swagger/views/swagger-ui
+        mapping: /swagger-ui/**
+datasources:
+  default:
+    db-type: postgres
+    url: jdbc:postgresql://${PG_HOST:localhost}:${PG_PORT:15432}/${PG_DBNAME:postgres}?schema=accounts_schema
+    schema: accounts_schema
+    username: ${PG_USER:postgres}
+    password: ${PG_PASSWORD:admin}
+r2dbc:
+  datasources:
+    default:
+      schema-generate: none
+      db-type: postgres
+      url: r2dbc:postgresql://${PG_HOST:localhost}:${PG_PORT:15432}/${PG_DBNAME:postgres}?schema=accounts_schema
+      schema: accounts_schema
+      username: ${PG_USER:postgres}
+      password: ${PG_PASSWORD:admin}
+flyway:
+  datasources:
+    default:
+      enabled: true
+      validate-migration-naming: true
+logger:
+  levels:
+    io.micronaut.security: TRACE
+    io.micronaut.http: DEBUG
+    io.micronaut.runtime: DEBUG
